@@ -721,7 +721,26 @@ FETCH FIRST 10 ROWS ONLY;`;
     });
     await new Promise((r) => setTimeout(r, 400));
 
-    // Complete result
+    // Complete result - Link directly to Backend API (/api/query)
+    try {
+      if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
+        const res = await fetch('/api/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: question })
+        });
+        if (res.ok) {
+          const apiData = await res.json();
+          if (apiData && apiData.success !== undefined) {
+            return apiData;
+          }
+        }
+      }
+    } catch (apiErr) {
+      console.info('Backend API request fell back to in-memory Oracle simulation engine:', apiErr.message);
+    }
+
+    // Local / client-side execution fallback
     return this.processNaturalQuery(question);
   }
 
