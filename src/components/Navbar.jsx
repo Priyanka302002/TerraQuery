@@ -90,7 +90,7 @@ export default function Navbar({ activeRoute, onNavigate, onOpenConfig }) {
                 TERRAQUERY
               </span>
               <span className="pill pill-cyan" style={{ fontSize: '0.65rem', padding: '2px 8px' }}>
-                SELECT AI
+                AI RAINFALL
               </span>
             </div>
             <p style={{
@@ -101,9 +101,9 @@ export default function Navbar({ activeRoute, onNavigate, onOpenConfig }) {
               alignItems: 'center',
               gap: '4px'
             }}>
-              <span>Oracle AI Database 26ai</span>
+              <span>Google Gemini + MongoDB Atlas</span>
               <span style={{ color: 'var(--accent-cyan)' }}>•</span>
-              <span>Natural-Language Earth Data</span>
+              <span>Natural-Language Rainfall Analytics</span>
             </p>
           </div>
         </div>
@@ -159,7 +159,7 @@ export default function Navbar({ activeRoute, onNavigate, onOpenConfig }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
             onClick={onOpenConfig}
-            title="Click to view Oracle AI Database connection parameters"
+            title="Click to view database and AI connection status"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -184,13 +184,13 @@ export default function Navbar({ activeRoute, onNavigate, onOpenConfig }) {
               e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 242, 254, 0.1)';
             }}
           >
-            <span className="led-indicator led-cyan" />
+            <span className="led-indicator led-emerald" />
             <div style={{ textAlign: 'left', lineHeight: 1.2 }}>
               <div style={{ color: 'var(--text-primary)', fontSize: '0.74rem' }}>
-                Oracle AI Database 26ai
+                MongoDB Atlas
               </div>
               <div style={{ color: 'var(--accent-cyan)', fontSize: '0.68rem', fontWeight: 500 }}>
-                Prototype Mode (Simulated)
+                Live Backend Connected
               </div>
             </div>
             <Server size={14} color="#38BDF8" style={{ marginLeft: '4px' }} />

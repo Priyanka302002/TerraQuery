@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar.jsx';
-import OracleConfigModal from './components/OracleConfigModal.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import ExploreData from './pages/ExploreData.jsx';
 import Analytics from './pages/Analytics.jsx';
 import Architecture from './pages/Architecture.jsx';
 import History from './pages/History.jsx';
 import About from './pages/About.jsx';
+import DatabaseConfigModal from './components/DatabaseConfigModal.jsx';
 import { 
   Globe2, 
   Database, 
@@ -30,6 +30,7 @@ export default function App() {
 
   const [activeRoute, setActiveRoute] = useState(getRouteFromPath());
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [pendingQuery, setPendingQuery] = useState(null);
   const [historyItems, setHistoryItems] = useState(() => {
     try {
       const saved = localStorage.getItem('terraquery_history');
@@ -59,7 +60,7 @@ export default function App() {
 
   const addHistoryItem = (item) => {
     setHistoryItems((prev) => {
-      const updated = [item, ...prev.filter((h) => h.canonicalQuestion !== item.canonicalQuestion)].slice(0, 20);
+      const updated = [item, ...prev.filter((h) => (h.canonicalQuestion || h.question) !== (item.canonicalQuestion || item.question))].slice(0, 20);
       try {
         localStorage.setItem('terraquery_history', JSON.stringify(updated));
       } catch (err) {
@@ -94,6 +95,8 @@ export default function App() {
             onAddHistory={addHistoryItem}
             onOpenConfig={() => setIsConfigModalOpen(true)}
             onNavigate={navigateTo}
+            pendingQuery={pendingQuery}
+            onClearPendingQuery={() => setPendingQuery(null)}
           />
         )}
         {activeRoute === 'explore' && <ExploreData />}
@@ -103,16 +106,8 @@ export default function App() {
           <History
             historyItems={historyItems}
             onSelectQuery={(q) => {
+              setPendingQuery(q);
               navigateTo('dashboard');
-              // trigger search via state dispatch or auto-fill
-              setTimeout(() => {
-                const searchInput = document.querySelector('input[type="text"]');
-                if (searchInput) {
-                  searchInput.value = q;
-                  const btn = searchInput.parentElement?.querySelector('button');
-                  if (btn) btn.click();
-                }
-              }, 100);
             }}
             onClearHistory={clearHistory}
           />
@@ -122,8 +117,8 @@ export default function App() {
         )}
       </main>
 
-      {/* Global Oracle Configuration & Security Modal */}
-      <OracleConfigModal
+      {/* Architecture & Database Config Status Modal */}
+      <DatabaseConfigModal
         isOpen={isConfigModalOpen}
         onClose={() => setIsConfigModalOpen(false)}
       />
@@ -155,11 +150,11 @@ export default function App() {
                   TERRAQUERY
                 </span>
                 <span className="pill pill-cyan" style={{ fontSize: '0.62rem' }}>
-                  26ai
+                  AI RAINFALL
                 </span>
               </div>
               <p style={{ fontSize: '0.82rem', lineHeight: 1.6, color: 'var(--text-muted)' }}>
-                AI-Powered Natural-Language Climate Intelligence Platform. Grounded on Oracle AI Database 26ai, Select AI, and high-fidelity Earth observation datasets.
+               Natural-language rainfall analytics platform. Grounded on real IMD rainfall data using Google Gemini and MongoDB Atlas.
               </p>
             </div>
 
@@ -174,7 +169,7 @@ export default function App() {
                     onClick={() => navigateTo('dashboard')}
                     style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}
                   >
-                    AI Climate Query Dashboard
+                    Rainfall Query Dashboard
                   </button>
                 </li>
                 <li>
@@ -182,7 +177,7 @@ export default function App() {
                     onClick={() => navigateTo('explore')}
                     style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}
                   >
-                    Explore 125k+ Observation Catalog
+                    Explore Rainfall Observations
                   </button>
                 </li>
                 <li>
@@ -190,7 +185,7 @@ export default function App() {
                     onClick={() => navigateTo('analytics')}
                     style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}
                   >
-                    Macro Trends & Climate Anomalies
+                    Rainfall Trends & Anomalies
                   </button>
                 </li>
                 <li>
@@ -198,7 +193,7 @@ export default function App() {
                     onClick={() => navigateTo('architecture')}
                     style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}
                   >
-                    System Architecture & Select AI
+                    System Architecture (Gemini + MongoDB)
                   </button>
                 </li>
               </ul>
@@ -207,12 +202,12 @@ export default function App() {
             {/* Col 3: Technical Specifications */}
             <div>
               <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F8FAFC', marginBottom: '12px' }}>
-                Enterprise Architecture
+                System Architecture
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                <div>• Platform: Oracle AI Database 26ai</div>
-                <div>• Query Layer: Select AI (DBMS_CLOUD_AI)</div>
-                <div>• Catalog: CLIMATE_INTEL_2026.CLIMATE_DATA</div>
+                <div>• Platform: MongoDB Atlas + Google Gemini</div>
+                <div>• Query Layer: AI-Generated MongoDB Queries</div>
+                <div>• Database: terraquery.rainfall</div>
                 <div>• Security: Read-Only Role Enforcement</div>
                 <div style={{ marginTop: '4px' }}>
                   <button
@@ -229,7 +224,7 @@ export default function App() {
                       gap: '4px'
                     }}
                   >
-                    <span>View Connection Secrets & Status</span>
+                    <span>View Connection Status & Latency</span>
                     <ArrowRight size={12} />
                   </button>
                 </div>
@@ -250,12 +245,12 @@ export default function App() {
             color: 'var(--text-muted)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="led-indicator led-cyan" />
-              <span>Prototype Mode — Oracle connection simulated with structured 125,000+ observation schema</span>
+              <span className="led-indicator led-emerald" />
+              <span>LIVE MODE — Powered by Google Gemini + MongoDB Atlas with real IMD rainfall data</span>
             </div>
 
             <div>
-              Built for Oracle AI Database 26ai Hackathon • No SQL. Just Ask.
+             Natural-language rainfall analytics. Grounded on real observations.
             </div>
           </div>
         </div>

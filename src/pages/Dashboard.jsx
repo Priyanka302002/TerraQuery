@@ -19,7 +19,7 @@ import {
   Sliders,
   ExternalLink
 } from 'lucide-react';
-import { aiQueryService } from '../services/aiQueryService.js';
+//import { aiQueryService } from '../services/aiQueryService.js';
 import ExecutionPipeline from '../components/ExecutionPipeline.jsx';
 import KpiCard from '../components/Charts/KpiCard.jsx';
 import BarChart from '../components/Charts/BarChart.jsx';
@@ -29,7 +29,7 @@ import AnomalyDivergingChart from '../components/Charts/AnomalyDivergingChart.js
 import ClimateMap from '../components/ClimateMap.jsx';
 import ExplainQueryModal from '../components/ExplainQueryModal.jsx';
 
-export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
+export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate, pendingQuery, onClearPendingQuery }) {
   const [queryInput, setQueryInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [pipelineState, setPipelineState] = useState({ step: 1, detail: '' });
@@ -37,24 +37,24 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
   const [explainModalOpen, setExplainModalOpen] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
 
-  // Suggested queries chips from prompt requirements
+  // Suggested queries chips for rainfall analytics
   const SUGGESTED_CHIPS = [
-    { label: 'Highest temperature in 2024', q: 'Which district in Chhattisgarh had the highest temperature in 2024?' },
-    { label: 'Compare rainfall by district', q: 'Compare rainfall between Durg and Raipur from 2020 to 2024.' },
-    { label: 'Compare temp & rainfall (2 regions)', q: 'Compare temperature and rainfall between two regions.' },
-    { label: 'Show temperature trend', q: 'Show the temperature trend of Durg over the last 5 years.' },
-    { label: '5-year rainfall trend', q: 'Show rainfall trend from 2020–2024.' },
-    { label: 'Find rainfall anomalies', q: 'Which districts experienced unusually high rainfall?' },
-    { label: 'Highest humidity district', q: 'Which district had the highest humidity?' },
-    { label: 'Top 5 by precipitation', q: 'Show me the top 5 districts by precipitation.' },
-    { label: 'Monsoon humidity', q: 'What was the average humidity in Chhattisgarh during monsoon?' },
-    { label: 'Weather forecast guardrail', q: 'Will it rain tomorrow?' }
+    { label: 'Highest rainfall district', q: 'Which district had the highest rainfall?' },
+    { label: 'Compare Durg vs Raipur', q: 'Compare rainfall between Durg and Raipur.' },
+    { label: 'Show rainfall trend', q: 'Show the rainfall trend over the available years.' },
+    { label: 'Find rainfall anomalies', q: 'Find rainfall anomalies.' },
+    { label: 'Chhattisgarh rainfall', q: 'What was the daily rainfall across Chhattisgarh districts?' },
+    { label: 'Excess rainfall districts', q: 'Which districts experienced unusually high rainfall?' }
   ];
 
-  // Auto-run primary demo query on initial page load as required
+  // Re-run search if a pending query is passed from Query History
   useEffect(() => {
-    executeSearch('Which district in Chhattisgarh had the highest temperature in 2024?');
-  }, []);
+    if (pendingQuery) {
+      setQueryInput(pendingQuery);
+      executeSearch(pendingQuery);
+      if (onClearPendingQuery) onClearPendingQuery();
+    }
+  }, [pendingQuery]);
 
   const executeSearch = async (questionToRun) => {
     const q = (questionToRun || queryInput).trim();
@@ -64,17 +64,155 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
     setIsProcessing(true);
     setQueryResult(null);
 
+    const startTime = performance.now();
+
     try {
-      const result = await aiQueryService.executeWithProgress(q, ({ step, detail }) => {
-        setPipelineState({ step, detail });
+      // Step 1: Sending question
+      setPipelineState({
+        step: 1,
+        detail: 'Sending natural-language question to Google Gemini...'
       });
 
+      // Step 2: Gemini generates MongoDB query
+      setPipelineState({
+        step: 2,
+        detail: 'Gemini is generating a MongoDB rainfall aggregation query...'
+      });
+
+      const response = await fetch('/api/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          question: q
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Step 3: Validation + database execution
+      setPipelineState({
+        step: 3,
+        detail: 'Query validated as read-only. Executing on MongoDB Atlas...'
+      });
+
+      // Step 4: Results
+      setPipelineState({
+        step: 4,
+        detail: 'Real IMD rainfall data retrieved successfully from MongoDB Atlas.'
+      });
+
+      if (!data.success) {
+        throw new Error(data.error || 'Query failed.');
+      }
+
+      const records = data.result?.records || [];
+      const firstRecord = records[0] || {};
+      const elapsed = Math.round(performance.now() - startTime);
+
+      // Determine the primary metric key
+      const metricKey = data.visualization?.metric || 
+        ('TotalActual' in firstRecord ? 'TotalActual' : 
+         'avgDailyActual' in firstRecord ? 'avgDailyActual' : 
+         'totalRainfall' in firstRecord ? 'totalRainfall' : 
+         'Daily Actual' in firstRecord ? 'Daily Actual' : 
+         'Daily Departure Per' in firstRecord ? 'Daily Departure Per' :
+         'value' in firstRecord ? 'value' : null);
+
+      const kpiVal = metricKey && firstRecord[metricKey] !== undefined 
+        ? firstRecord[metricKey] 
+        : (firstRecord['Daily Actual'] ?? firstRecord['TotalActual'] ?? null);
+
+      const kpiUnit = data.visualization?.unit || 'mm';
+
+      const result = {
+        question: q,
+
+        // Backend information
+        ai: data.ai || 'Google Gemini',
+        database: data.database || 'MongoDB Atlas',
+        generatedQuery: data.query,
+        visualization: data.visualization || { type: 'ranking_bar', metric: metricKey || 'Daily Actual', unit: kpiUnit },
+        validation: data.validation,
+
+        // Result information
+        tableData: records,
+        records,
+        resultCount: data.result?.count || records.length,
+
+        // Dashboard display KPI
+        kpi: kpiVal !== null ? {
+          value: `${typeof kpiVal === 'number' ? Number(kpiVal).toFixed(1) : kpiVal} ${kpiUnit}`,
+          label: data.visualization?.title || (firstRecord.District ? `${firstRecord.District} Rainfall` : 'Rainfall Metric'),
+          district: firstRecord.District || firstRecord._id || firstRecord.label,
+          year: firstRecord.Date ? String(firstRecord.Date).slice(0, 4) : (firstRecord.year || ''),
+          sublabel: `${firstRecord.State || 'IMD Rainfall Dataset'}${firstRecord.Date ? ' • ' + firstRecord.Date : ''}`
+        } : null,
+
+        explanation: data.explanation || (
+          records.length
+            ? `Retrieved ${records.length} record${records.length === 1 ? '' : 's'} from the real IMD rainfall dataset in MongoDB Atlas.`
+            : 'No matching rainfall records were found for this query.'
+        ),
+
+        connectionModeText: 'LIVE GEMINI + MONGODB ATLAS',
+        executionTimeMs: elapsed,
+        rowsExamined: data.result?.count || records.length,
+
+        // Map chart data accurately
+        chartData: records.map((record, index) => {
+          const label = record.District ?? record.district ?? record._id ?? record.Date ?? record.date ?? record.year ?? record.label ?? `Item ${index + 1}`;
+          const rawVal = Number(
+            record[data.visualization?.metric] ??
+            record.TotalActual ??
+            record.avgDailyActual ??
+            record.totalRainfall ??
+            record['Daily Actual'] ??
+            record['Daily Departure Per'] ??
+            record.value ??
+            0
+          );
+          return {
+            label: String(label),
+            value: isNaN(rawVal) ? 0 : Number(rawVal.toFixed(2)),
+            departure: record['Daily Departure Per'] ?? record.departure,
+            category: record['Daily Category'] ?? record.category,
+            isHighlight: index === 0
+          };
+        }),
+
+        vizTitle: data.visualization?.title ||
+          (records.length > 1 ? 'Rainfall Analytics' : 'Daily Rainfall Metric'),
+        parameter: 'rainfall',
+        activeDistrict: firstRecord.District || 'DURG',
+        mapMode: 'rainfall',
+
+        // JSON query display for transparency
+        generatedSQL: JSON.stringify(data.query, null, 2)
+      };
+     
       setQueryResult(result);
+
       if (onAddHistory) {
         onAddHistory(result);
       }
+
     } catch (err) {
       console.error('Execution error:', err);
+
+      setQueryResult({
+        question: q,
+        isGuardrail: true,
+        message: 'Unable to process this rainfall query.',
+        suggestion: err.message || 'Please check your connection to the TerraQuery backend or rephrase the question.'
+      });
+
     } finally {
       setIsProcessing(false);
     }
@@ -88,7 +226,7 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
   };
 
   const handleDistrictMapSelect = (districtName) => {
-    executeSearch(`Show the temperature and climate metrics for ${districtName} in 2024`);
+    executeSearch(`Show rainfall for ${districtName}`);
   };
 
   return (
@@ -100,13 +238,13 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
         position: 'relative'
       }}>
         <div className="container" style={{ maxWidth: '960px' }}>
-          {/* Oracle Badge */}
+          {/* Status Badge */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
             <span className="pill pill-cyan" style={{ fontSize: '0.72rem', padding: '4px 14px' }}>
-              <Sparkles size={12} /> ORACLE SELECT AI LAYER
+              <Sparkles size={12} /> GEMINI + MONGODB ATLAS
             </span>
             <span className="pill pill-muted" style={{ fontSize: '0.72rem' }}>
-              Oracle AI Database 26ai
+              MONGODB ATLAS
             </span>
           </div>
 
@@ -158,7 +296,7 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') executeSearch();
               }}
-              placeholder="Ask a question about temperature, rainfall, humidity or precipitation..."
+              placeholder="Ask a question about rainfall, district comparisons, anomalies, or historical trends..."
               style={{
                 flex: 1,
                 background: 'transparent',
@@ -304,9 +442,9 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
             flexWrap: 'wrap'
           }}>
             <span>Powered by:</span>
-            <span style={{ color: '#F8FAFC', fontWeight: 600 }}>Oracle AI Database 26ai</span>
+            <span style={{ color: '#F8FAFC', fontWeight: 600 }}>MONGODB ATLAS</span>
             <span style={{ color: 'var(--accent-cyan)' }}>•</span>
-            <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>Select AI</span>
+            <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>Google Gemini</span>
             <span style={{ color: 'var(--accent-cyan)' }}>•</span>
             <span style={{ color: '#94A3B8' }}>LLM-powered Natural Language Analytics</span>
           </div>
@@ -365,7 +503,7 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
 
                 <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
                   <button
-                    onClick={() => executeSearch('Which district in Chhattisgarh had the highest temperature in 2024?')}
+                    onClick={() => executeSearch('Which district had the highest rainfall?')}
                     className="btn btn-outline"
                     style={{ fontSize: '0.82rem' }}
                   >
@@ -449,7 +587,7 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                     <span className="pill pill-emerald" style={{ fontSize: '0.68rem' }}>AI INSIGHT</span>
                     <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                      Select AI Natural-Language Synthesis
+                      Google Gemini Natural-Language Synthesis
                     </span>
                   </div>
 
@@ -472,7 +610,7 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
                   fontSize: '0.74rem',
                   color: 'var(--text-muted)'
                 }}>
-                  <span>Context: Oracle AI Database 26ai Climate Catalog</span>
+                  <span>Context: MONGODB ATLAS Climate Catalog</span>
                   <span style={{ color: 'var(--accent-emerald)', fontWeight: 600 }}>Zero Hallucination</span>
                 </div>
               </div>
@@ -485,41 +623,106 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
               gap: '24px',
               minHeight: '400px'
             }}>
-              {/* Smart Selected Visualization */}
-              <div>
-                {queryResult.recommendedViz === 'ranking-bar' && (
-                  <BarChart 
-                    data={queryResult.chartData} 
-                    title={queryResult.vizTitle} 
-                    unit={queryResult.parameter === 'temperature' ? '°C' : (queryResult.parameter === 'rainfall' ? 'mm' : '%')}
-                  />
-                )}
-                {queryResult.recommendedViz === 'comparison-bar' && (
-                  <ComparisonChart 
-                    data={queryResult.chartData} 
-                    title={queryResult.vizTitle}
-                    seriesMeta={queryResult.seriesMeta}
-                  />
-                )}
-                {queryResult.recommendedViz === 'line-trend' && (
-                  <LineTrendChart 
-                    data={queryResult.chartData} 
-                    title={queryResult.vizTitle} 
-                  />
-                )}
-                {queryResult.recommendedViz === 'anomaly-diverging' && (
-                  <AnomalyDivergingChart 
-                    data={queryResult.chartData} 
-                    title={queryResult.vizTitle} 
-                  />
-                )}
-              </div>
+             {/* Smart Selected Visualization */}
+<div>
+  {queryResult.visualization?.type === 'map_highlight' && (
+    <div
+      style={{
+        padding: '20px',
+        borderRadius: '14px',
+        background: 'rgba(15, 23, 42, 0.65)',
+        border: '1px solid rgba(34, 211, 238, 0.2)',
+        color: '#e2e8f0'
+      }}
+    >
+      <div
+        style={{
+          fontSize: '11px',
+          fontWeight: '700',
+          letterSpacing: '1px',
+          color: '#67e8f9',
+          marginBottom: '8px'
+        }}
+      >
+        CLIMATE HIGHLIGHT
+      </div>
+
+      <h3 style={{ margin: '0 0 12px' }}>
+        {queryResult.visualization.title}
+      </h3>
+
+      {queryResult.kpi && (
+        <>
+          <div
+            style={{
+              fontSize: '32px',
+              fontWeight: '700',
+              marginBottom: '4px'
+            }}
+          >
+            {queryResult.kpi.value}
+          </div>
+
+          <div
+            style={{
+              fontSize: '15px',
+              color: '#cbd5e1'
+            }}
+          >
+            {queryResult.kpi.district}
+          </div>
+
+          <div
+            style={{
+              fontSize: '12px',
+              color: '#94a3b8',
+              marginTop: '4px'
+            }}
+          >
+            {queryResult.kpi.sublabel}
+          </div>
+        </>
+      )}
+    </div>
+  )}
+
+  {(!queryResult.visualization?.type || queryResult.visualization?.type === 'ranking_bar') && (
+    <BarChart 
+      data={queryResult.chartData} 
+      title={queryResult.vizTitle} 
+      unit={queryResult.visualization?.unit || 'mm'}
+    />
+  )}
+
+  {queryResult.visualization?.type === 'comparison_bar' && (
+    <ComparisonChart 
+      data={queryResult.chartData} 
+      title={queryResult.vizTitle}
+      seriesMeta={queryResult.seriesMeta}
+    />
+  )}
+
+  {queryResult.visualization?.type === 'line_trend' && (
+    <LineTrendChart 
+      data={queryResult.chartData} 
+      title={queryResult.vizTitle} 
+      unit={queryResult.visualization?.unit || 'mm'}
+    />
+  )}
+
+  {queryResult.visualization?.type === 'anomaly_diverging' && (
+    <AnomalyDivergingChart 
+      data={queryResult.chartData} 
+      title={queryResult.vizTitle} 
+    />
+  )}
+</div>
 
               {/* Geographic Climate Cartogram Map */}
               <div>
-                <ClimateMap 
-                  activeDistrict={queryResult.activeDistrict || 'Durg'}
-                  mapMode={queryResult.mapMode || 'temperature'}
+                <ClimateMap highlightDistrict={queryResult?.records?.[0]?.District || null}
+                  activeDistrict={queryResult.activeDistrict || 'DURG'}
+                  mapMode={queryResult.mapMode || 'rainfall'}
                   onSelectDistrict={handleDistrictMapSelect}
                 />
               </div>
@@ -539,7 +742,7 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
                     <h4 style={{ fontSize: '1rem', fontWeight: 700 }}>Supporting Climate Observation Table</h4>
                   </div>
                   <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                    {queryResult.tableData.length} Records Retrieved from Oracle Database
+                    {queryResult.tableData.length} Records Retrieved from MongoDB Atlas
                   </span>
                 </div>
 
@@ -612,13 +815,13 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span className="pill pill-cyan" style={{ fontSize: '0.65rem' }}>AI-GENERATED QUERY</span>
                       <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#F8FAFC' }}>
-                        Executed against Oracle AI Database 26ai
+                        Executed against MONGODB ATLAS
                       </span>
                     </div>
                     <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      Translated via Select AI (DBMS_CLOUD_AI) • Role: ROLE_CLIMATE_ANALYTICS_RO
+                      Generated via Google Gemini • Validated as read-only before execution
                     </p>
-                  </div>
+                  </div>   
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -628,7 +831,7 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
                     style={{ fontSize: '0.76rem', padding: '5px 12px' }}
                   >
                     {copiedSql ? <Check size={13} color="#10B981" /> : <Copy size={13} />}
-                    <span>{copiedSql ? 'Copied' : 'Copy SQL'}</span>
+                    <span>{copiedSql ? 'Copied' : 'Copy Query'}</span>
                   </button>
 
                   <button
@@ -664,7 +867,7 @@ export default function Dashboard({ onAddHistory, onOpenConfig, onNavigate }) {
                   <span className="led-indicator led-emerald" />
                   <span>Security Note: AI-generated queries are validated and executed using restricted read-only permissions.</span>
                 </div>
-                <span>Catalog: CLIMATE_INTEL_2026.CLIMATE_DATA</span>
+                <span>Collection: terraquery.rainfall</span>
               </div>
             </div>
 

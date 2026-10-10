@@ -13,184 +13,115 @@ import {
   ShieldCheck, 
   CheckCircle2,
   Terminal,
-  HelpCircle
+  HelpCircle,
+  FileCheck
 } from 'lucide-react';
 
 export default function Architecture() {
-  const [selectedNode, setSelectedNode] = useState('select-ai');
+  const [selectedNode, setSelectedNode] = useState('gemini');
 
   const ARCHITECTURE_NODES = [
     {
       id: 'user',
-      title: '1. USER',
-      badge: 'NON-TECHNICAL ANALYST',
-      subtitle: 'Researchers, Disaster Teams, Policy Makers',
+      title: '1. USER & CLIMATE ANALYST',
+      badge: 'NATURAL LANGUAGE INPUT',
+      subtitle: 'Researchers, Disaster Teams, Agricultural Planners',
       icon: User,
       color: '#38BDF8',
-      description: 'The end-user interacts exclusively using natural English questions (e.g., "Which district in Chhattisgarh had the highest temperature in 2024?"). No SQL or database engineering knowledge is required.',
+      description: 'The end-user asks natural-language questions (e.g., "Which district had the highest rainfall?", "Compare rainfall between Durg and Raipur"). No database syntax or query language knowledge is required.',
       details: [
-        'Zero SQL syntax learning curve',
-        'Mobile, desktop, and API conversational client interfaces',
-        'Automatic intent translation into actionable analytics'
+        'Zero query syntax learning curve',
+        'Natural-language questions translated seamlessly',
+        'Conversational interface tuned for climate & rainfall analysis'
       ]
     },
     {
       id: 'dashboard',
-      title: '2. WEB DASHBOARD',
+      title: '2. TERRAQUERY WEB DASHBOARD',
       badge: 'FRONTEND INTERFACE',
       subtitle: 'React + Modern Climate-Tech Design System',
       icon: Layout,
       color: '#00F2FE',
-      description: 'Provides query suggestions, live execution pipeline animations, geographic SVG climate maps, interactive charts, and an AI transparency lineage modal.',
+      description: 'Provides rainfall query inputs, interactive suggested chips, real-time pipeline execution stages, SVG India & district choropleth maps, and full query transparency.',
       details: [
-        'Adaptive visualization selection (KPI, Bar, Line, Anomaly)',
-        'Interactive Chhattisgarh district GIS cartogram',
-        'Explain Query audit trail inspects full execution lineage'
+        'Adaptive visualization selection (KPI Cards, Bar Charts, Comparisons, Anomalies)',
+        'Interactive SVG cartogram with rainfall intensity heatmaps',
+        'Query transparency inspector showing exact MongoDB queries'
       ]
     },
     {
       id: 'backend',
-      title: '3. BACKEND / API LAYER',
+      title: '3. BACKEND API GATEWAY',
       badge: 'ORCHESTRATION & SECURITY',
-      subtitle: 'FastAPI / Node.js Microservice Gateway',
+      subtitle: 'Node.js Express Microservice Gateway (server.js)',
       icon: Server,
       color: '#60A5FA',
-      description: 'Handles rate limiting, request validation, air-gapped credential protection, and delegates queries to the Oracle AI Database 26ai Select AI layer.',
+      description: 'Coordinates request routing, handles CORS headers, guards environment variables and API credentials, and manages communication between the frontend, Google Gemini, and MongoDB Atlas.',
       details: [
-        'Sanitizes user input to prevent prompt injection',
-        'Keeps database credentials sealed in secure server vault',
-        'Provides WebSocket / SSE progress streams during query translation'
+        'Secure proxying preventing credential leakage to the browser',
+        'Live health monitoring at /api/health with database status',
+        'Standardized error handling and JSON validation'
       ]
     },
     {
-      id: 'oracle-db',
-      title: '4. ORACLE AI DATABASE 26ai',
-      badge: 'CORE DATA PLATFORM',
-      subtitle: 'Enterprise Autonomous Database 26ai',
-      icon: Database,
-      color: '#00F2FE',
-      description: 'Houses the structured climate observation tables, autonomous indexing, in-memory columnar store, and native AI capabilities.',
-      details: [
-        'Contains 125,000+ indexed observations in CLIMATE_DATA table',
-        'Hybrid Columnar Compression (HCC) for high throughput',
-        'Role-Based Access Control enforcing read-only permissions'
-      ]
-    },
-    {
-      id: 'select-ai',
-      title: '5. SELECT AI (DBMS_CLOUD_AI)',
-      badge: 'PROPRIETARY ORACLE AI LAYER',
-      subtitle: 'Native In-Database Natural Language Engine',
+      id: 'gemini',
+      title: '4. GOOGLE GEMINI AI ENGINE',
+      badge: 'AI QUERY GENERATOR',
+      subtitle: 'Google Gemini 2.5 / 1.5 Flash (geminiQueryService.js)',
       icon: Cpu,
       color: '#A78BFA',
-      description: 'Oracle 26ai\'s native feature that bridges relational schemas with Large Language Models. Transforms natural language prompts directly into validated SQL inside database boundaries.',
+      description: 'Transforms natural-language questions into deterministic MongoDB aggregation pipelines using the grounded IMD rainfall schema catalog. Gemini does NOT guess or fabricate rainfall statistics.',
       details: [
-        'Package: DBMS_CLOUD_AI',
-        'Eliminates custom middleware SQL translators',
-        'Enforces schema catalog grounding so the model sees table structure'
+        'Strict schema grounding on IMD rainfall fields (District, State, Date, Daily Actual, Daily Normal)',
+        'Translates natural questions directly into MongoDB find() or aggregate() syntax',
+        'Includes auto-quoting JSON parser for unquoted MongoDB operators'
       ]
     },
     {
-      id: 'ai-profile',
-      title: '6. AI PROFILE & METADATA BINDINGS',
-      badge: 'ORACLE AI PROFILE',
-      subtitle: 'DBMS_CLOUD_AI.CREATE_PROFILE Configuration',
-      icon: Sparkles,
-      color: '#C084FC',
-      description: 'Configures provider credentials, schema context, and target database objects. Defines exactly which tables (e.g. CLIMATE_DATA) the AI can access.',
-      details: [
-        'Profile Name: CLIMATE_SELECT_AI_V2',
-        'Scoped strictly to CLIMATE_ADMIN.CLIMATE_DATA catalog',
-        'System metadata, sensitive tables, and DDL commands blocked'
-      ]
-    },
-    {
-      id: 'llm',
-      title: '7. LLM / OCI GENERATIVE AI',
-      badge: 'FOUNDATION MODEL',
-      subtitle: 'OCI GenAI (Cohere Command R+ / OpenAI / Azure)',
-      icon: Cpu,
-      color: '#F472B6',
-      description: 'Translates natural language questions into strict Oracle SQL syntax using table DDL schemas provided by the AI Profile. Crucially, the LLM does NOT invent climate numbers.',
-      details: [
-        'Translates English to SQL syntax only',
-        'Receives schema DDL context, NOT arbitrary training guesses',
-        'Returns executable SQL queries back to Oracle SQL Engine'
-      ]
-    },
-    {
-      id: 'sql-engine',
-      title: '8. ORACLE SQL EXECUTION ENGINE',
-      badge: 'GROUND TRUTH COMPUTE',
-      subtitle: 'Deterministic Relational Analytics',
-      icon: Code,
-      color: '#10B981',
-      description: 'Executes the validated SQL query on the structured climate dataset under ROLE_CLIMATE_ANALYTICS_RO with zero DDL or write permissions.',
-      details: [
-        'Deterministic execution produces verifiable mathematical outputs',
-        'Fast index scans and vectorized aggregations in milliseconds',
-        'Returns pure tabular rows: District, Temperature, Rainfall, Date'
-      ]
-    },
-    {
-      id: 'climate-dataset',
-      title: '9. STRUCTURED CLIMATE DATASET',
-      badge: 'GROUND TRUTH STORAGE',
-      subtitle: '125,000+ Observations across Chhattisgarh & India',
-      icon: Database,
-      color: '#34D399',
-      description: 'The physical database table storing temperature, rainfall, humidity, wind, and pressure records from 2020 through 2024. All numbers shown to the user originate here.',
-      details: [
-        'Columns: id, date, district, state, temp, rain, hum, wind, press',
-        'Strict constraints and foreign key integrity',
-        'Partitioned by year and sub-divided by district'
-      ]
-    },
-    {
-      id: 'analytics',
-      title: '10. ANALYTICS & ANOMALY DETECTION',
-      badge: 'POST-PROCESSING INTELLIGENCE',
-      subtitle: 'Baseline Departures & Trend Regressions',
-      icon: BarChart3,
+      id: 'validator',
+      title: '5. QUERY VALIDATOR & GUARDRAILS',
+      badge: 'SECURITY GATEWAY',
+      subtitle: 'Deterministic AST Query Inspection (queryValidator.js)',
+      icon: FileCheck,
       color: '#F59E0B',
-      description: 'Calculates percentage departures from historical baselines, standard deviations, and multi-year warming trend slopes before rendering.',
+      description: 'Performs static inspection on AI-generated queries before execution. Strictly enforces read-only access and blocks dangerous operators or destructive operations.',
       details: [
-        'Identifies anomalies like Korba +31.4% precipitation surplus',
-        'Computes multi-year linear warming rate (+0.32°C/year in Durg)',
-        'Scores severity as normal, elevated, or critical excess'
+        'Blocks write operations, drops, deletes, and unauthorized mutations',
+        'Restricts execution exclusively to read-only queries and aggregation pipelines',
+        'Prevents script injections and out-of-scope database access'
+      ]
+    },
+    {
+      id: 'mongodb',
+      title: '6. MONGODB ATLAS CLOUD DATABASE',
+      badge: 'DATA STORE',
+      subtitle: 'MongoDB Atlas Distributed Database (terraquery.rainfall)',
+      icon: Database,
+      color: '#10B981',
+      description: 'Stores real Indian Meteorological Department (IMD) observation records. Executes validated aggregation pipelines with high throughput and indexing.',
+      details: [
+        'Real observation records with historical daily actuals and normals',
+        'WiredTiger storage engine with multi-stage aggregation compute',
+        'Strict read-only application connection credentials'
       ]
     },
     {
       id: 'visualization',
-      title: '11. AUTOMATIC VISUALIZATION ENGINE',
-      badge: 'SMART VISUALIZATION',
-      subtitle: 'Adaptive Chart & Map Selection',
-      icon: Layout,
-      color: '#38BDF8',
-      description: 'Selects the optimal visual representation based on query semantics (e.g. comparison -> dual bars, temporal -> trendline, spatial -> GIS map).',
+      title: '7. GROUNDED INSIGHTS & VISUALIZATION',
+      badge: 'SYNTHESIS & REPORTING',
+      subtitle: 'Deterministic Ground Truth Presentation',
+      icon: BarChart3,
+      color: '#34D399',
+      description: 'Renders the computed results from MongoDB Atlas into interactive charts, tables, and AI explanations grounded strictly in the returned database rows.',
       details: [
-        'Single metric -> Key KPI Card',
-        'Geographic query -> Chhattisgarh GIS cartogram',
-        'Multi-district comparison -> Grouped dual bar chart'
-      ]
-    },
-    {
-      id: 'ai-explanation',
-      title: '12. GROUNDED AI EXPLANATION → USER',
-      badge: 'VERIFIED INSIGHT',
-      subtitle: 'Synthesis Grounded in Database Rows',
-      icon: CheckCircle2,
-      color: '#10B981',
-      description: 'Generates a concise plain-English explanation summarizing the exact tabular rows returned from the database. Zero hallucination guarantee.',
-      details: [
-        'Numbers are derived strictly from database output rows',
-        'Bold highlights for key findings and regional variances',
-        'Provides transparent "Explain Query" lineage on demand'
+        'Zero hallucination guarantee: numbers originate solely from database records',
+        'Adaptive visualization routing (Ranking Bar, Comparison, Trend, Anomaly)',
+        'Full lineage transparency with explain query modal'
       ]
     }
   ];
 
-  const activeNodeData = ARCHITECTURE_NODES.find((n) => n.id === selectedNode) || ARCHITECTURE_NODES[4];
+  const activeNodeData = ARCHITECTURE_NODES.find((n) => n.id === selectedNode) || ARCHITECTURE_NODES[3];
 
   return (
     <div className="container" style={{ padding: '40px 24px 80px' }}>
@@ -201,7 +132,7 @@ export default function Architecture() {
             <Layers size={13} /> TECHNICAL ARCHITECTURE
           </span>
           <span className="pill pill-emerald" style={{ fontSize: '0.72rem' }}>
-            ORACLE 26ai ENTERPRISE BLUEPRINT
+            GEMINI + MONGODB ATLAS
           </span>
         </div>
 
@@ -210,7 +141,7 @@ export default function Architecture() {
         </h2>
 
         <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginTop: '4px', maxWidth: '820px' }}>
-          How TerraQuery transforms natural language into deterministic database queries using Oracle AI Database 26ai and Select AI.
+          How TerraQuery transforms natural-language questions into deterministic rainfall insights using Google Gemini and MongoDB Atlas.
         </p>
       </div>
 
@@ -239,10 +170,10 @@ export default function Architecture() {
         </div>
         <div>
           <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#F8FAFC' }}>
-            Fundamental Differentiator: The LLM Does NOT Invent Climate Values
+            Fundamental Differentiator: The LLM Does NOT Invent Rainfall Values
           </h4>
           <p style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: 1.5 }}>
-            Unlike generic chat AI that guesses weather from static model weights, TerraQuery uses Oracle Select AI purely for <strong>Language-to-SQL translation</strong>. All numerical values, metrics, and trends are computed directly by the Oracle 26ai engine from verified climate observation tables.
+            Unlike generic chat systems that hallucinate statistics from model weights, TerraQuery uses Google Gemini strictly for <strong>Natural-Language-to-MongoDB Query Translation</strong>. All numerical values, metrics, and trends are computed deterministically by MongoDB Atlas from verified IMD observation records.
           </p>
         </div>
       </div>
@@ -374,7 +305,7 @@ export default function Architecture() {
               ))}
             </ul>
 
-            {/* Oracle 26ai Select AI PL/SQL Code Sample */}
+            {/* Real MongoDB Aggregation Pipeline Sample */}
             <div style={{
               background: '#040711',
               borderRadius: 'var(--radius-sm)',
@@ -383,22 +314,28 @@ export default function Architecture() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--accent-cyan)', fontSize: '0.78rem', fontWeight: 600 }}>
                 <Terminal size={14} />
-                <span>Oracle Select AI Implementation Spec:</span>
+                <span>MongoDB Rainfall Aggregation Query Sample:</span>
               </div>
-              <pre className="code-block" style={{ fontSize: '0.74rem', margin: 0, maxHeight: '180px' }}>
-{`-- Oracle Database 26ai Select AI Profile Setup
-BEGIN
-  DBMS_CLOUD_AI.CREATE_PROFILE(
-    profile_name => 'CLIMATE_SELECT_AI_V2',
-    attributes   => '{"provider": "oci",
-                      "model": "cohere.command-r-plus",
-                      "credential_name": "OCI_CRED",
-                      "object_list": [
-                        {"owner": "CLIMATE_ADMIN", "name": "CLIMATE_DATA"}
-                      ]}'
-  );
-END;
-/`}
+              <pre className="code-block" style={{ fontSize: '0.74rem', margin: 0, maxHeight: '200px' }}>
+{`// Sample Gemini Generated Aggregation Pipeline
+// Collection: terraquery.rainfall
+[
+  {
+    "$match": {
+      "State": { "$in": ["CHHATTISGARH", "CHHATISGARH"] },
+      "District": { "$in": ["DURG", "RAIPUR"] }
+    }
+  },
+  {
+    "$group": {
+      "_id": "$District",
+      "District": { "$first": "$District" },
+      "TotalActual": { "$sum": "$Daily Actual" },
+      "avgDailyActual": { "$avg": "$Daily Actual" }
+    }
+  },
+  { "$sort": { "TotalActual": -1 } }
+]`}
               </pre>
             </div>
 
@@ -412,8 +349,8 @@ END;
               alignItems: 'center',
               justifyContent: 'space-between'
             }}>
-              <span>Status: Architecture Validated</span>
-              <span style={{ color: 'var(--accent-cyan)' }}>Oracle 26ai Ready</span>
+              <span>Status: Pipeline Connected</span>
+              <span style={{ color: 'var(--accent-cyan)' }}>Google Gemini + MongoDB Atlas</span>
             </div>
           </div>
         </div>

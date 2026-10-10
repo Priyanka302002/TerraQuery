@@ -13,73 +13,51 @@ import {
 } from 'lucide-react';
 
 export default function History({ historyItems = [], onSelectQuery, onClearHistory }) {
-  // Fallback preset demo history matching Section 11 prompt requirements
+  // Preset history with real rainfall query scenarios
   const defaultHistory = [
     {
       id: 'h-1',
-      canonicalQuestion: 'Highest temperature in Durg in 2024',
-      userQuestion: 'Highest temperature in Durg in 2024',
+      canonicalQuestion: 'Which district had the highest rainfall?',
+      userQuestion: 'Which district had the highest rainfall?',
       executedAt: new Date(Date.now() - 1000 * 60 * 3).toISOString(),
-      executionTimeMs: 132,
+      executionTimeMs: 142,
       recommendedViz: 'ranking-bar',
       isGuardrail: false,
-      kpi: { value: '42.8°C', district: 'Durg' },
-      generatedSQL: "SELECT district, MAX(temperature) AS peak_temp, date FROM climate_data WHERE district = 'Durg' AND year = 2024..."
+      kpi: { value: '182.4 mm', district: 'SURGUJA' },
+      generatedSQL: '{\n  "collection": "rainfall",\n  "query": {},\n  "sort": { "Daily Actual": -1 },\n  "limit": 1\n}'
     },
     {
       id: 'h-2',
-      canonicalQuestion: 'Compare rainfall between Durg and Raipur',
-      userQuestion: 'Compare rainfall between Durg and Raipur from 2020 to 2024.',
+      canonicalQuestion: 'Compare rainfall between Durg and Raipur.',
+      userQuestion: 'Compare rainfall between Durg and Raipur.',
       executedAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
       executionTimeMs: 164,
       recommendedViz: 'comparison-bar',
       isGuardrail: false,
-      kpi: { value: '+165 mm/yr', district: 'Raipur vs Durg' },
-      generatedSQL: "SELECT district, year, ROUND(SUM(rainfall), 1) FROM climate_data WHERE district IN ('Durg','Raipur')..."
+      kpi: { value: '154.2 mm', district: 'RAIPUR vs DURG' },
+      generatedSQL: '[\n  { "$match": { "District": { "$in": ["DURG", "RAIPUR"] } } },\n  { "$group": { "_id": "$District", "TotalActual": { "$sum": "$Daily Actual" } } }\n]'
     },
     {
       id: 'h-3',
-      canonicalQuestion: 'Show rainfall trend from 2020–2024',
-      userQuestion: 'Show rainfall trend from 2020–2024.',
+      canonicalQuestion: 'Show the rainfall trend over the available years.',
+      userQuestion: 'Show the rainfall trend over the available years.',
       executedAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
       executionTimeMs: 161,
       recommendedViz: 'line-trend',
       isGuardrail: false,
-      kpi: { value: '1,248 mm', district: 'Statewide Trend' },
-      generatedSQL: "SELECT year, ROUND(AVG(rainfall) * 12, 1) FROM climate_data WHERE year BETWEEN 2020 AND 2024..."
+      kpi: { value: '1,120 mm', district: 'Historical Mean' },
+      generatedSQL: '[\n  { "$project": { "year": { "$substr": ["$Date", 0, 4] }, "Daily Actual": 1 } },\n  { "$group": { "_id": "$year", "avgDailyActual": { "$avg": "$Daily Actual" } } },\n  { "$sort": { "_id": 1 } }\n]'
     },
     {
       id: 'h-4',
-      canonicalQuestion: 'Which district had the highest humidity?',
-      userQuestion: 'Which district had the highest humidity?',
+      canonicalQuestion: 'Find rainfall anomalies.',
+      userQuestion: 'Find rainfall anomalies.',
       executedAt: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
       executionTimeMs: 144,
-      recommendedViz: 'ranking-bar',
-      isGuardrail: false,
-      kpi: { value: '86.8%', district: 'Jagdalpur' },
-      generatedSQL: "SELECT district, MAX(humidity) FROM climate_data WHERE year = 2024 GROUP BY district ORDER BY MAX(humidity) DESC..."
-    },
-    {
-      id: 'h-5',
-      canonicalQuestion: 'Which district in Chhattisgarh had the highest temperature in 2024?',
-      userQuestion: 'Which district in Chhattisgarh had the highest temperature in 2024?',
-      executedAt: new Date(Date.now() - 1000 * 60 * 150).toISOString(),
-      executionTimeMs: 138,
-      recommendedViz: 'ranking-bar',
-      isGuardrail: false,
-      kpi: { value: '42.8°C', district: 'Durg' },
-      generatedSQL: "SELECT district, MAX(temperature) FROM climate_data WHERE state = 'Chhattisgarh' AND year = 2024..."
-    },
-    {
-      id: 'h-6',
-      canonicalQuestion: 'Which districts experienced unusually high rainfall?',
-      userQuestion: 'Which districts experienced unusually high rainfall?',
-      executedAt: new Date(Date.now() - 1000 * 60 * 240).toISOString(),
-      executionTimeMs: 189,
       recommendedViz: 'anomaly-diverging',
       isGuardrail: false,
-      kpi: { value: '+31.4%', district: 'Korba' },
-      generatedSQL: "SELECT c.district, ROUND(((SUM(c.rainfall) - h.baseline) / h.baseline) * 100, 1) AS anomaly..."
+      kpi: { value: '+35.2%', district: 'DURG' },
+      generatedSQL: '{\n  "collection": "rainfall",\n  "query": { "Daily Category": { "$in": ["LE", "LD"] } },\n  "limit": 20\n}'
     }
   ];
 
@@ -102,7 +80,7 @@ export default function History({ historyItems = [], onSelectQuery, onClearHisto
               <HistoryIcon size={13} /> AUDIT & QUERY LOG
             </span>
             <span className="pill pill-muted" style={{ fontSize: '0.72rem' }}>
-              Select AI Session Log
+              MongoDB Atlas Session Log
             </span>
           </div>
 
@@ -111,7 +89,7 @@ export default function History({ historyItems = [], onSelectQuery, onClearHisto
           </h2>
 
           <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Review past natural-language queries, generated SQL statements, execution metrics, and visualizations. Click any record to re-run.
+            Review past natural-language queries, generated MongoDB queries, execution metrics, and visualizations. Click any record to re-run.
           </p>
         </div>
 
@@ -130,7 +108,7 @@ export default function History({ historyItems = [], onSelectQuery, onClearHisto
       {/* Query List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {displayList.map((item, idx) => {
-          const qText = item.userQuestion || item.canonicalQuestion;
+          const qText = item.question || item.userQuestion || item.canonicalQuestion;
           const timeAgo = item.executedAt 
             ? new Date(item.executedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             : 'Recent';
@@ -170,7 +148,7 @@ export default function History({ historyItems = [], onSelectQuery, onClearHisto
                   </span>
 
                   <span className={`pill ${item.isGuardrail ? 'pill-amber' : 'pill-emerald'}`} style={{ fontSize: '0.62rem' }}>
-                    {item.isGuardrail ? 'Guardrail Triggered' : 'Executed in 26ai'}
+                    {item.isGuardrail ? 'Guardrail Triggered' : 'Executed in MongoDB Atlas'}
                   </span>
 
                   <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -245,7 +223,7 @@ export default function History({ historyItems = [], onSelectQuery, onClearHisto
         alignItems: 'center',
         justifyContent: 'space-between'
       }}>
-        <span>Audit Trail: Session logs retained in browser memory and mapped to Oracle Select AI telemetry.</span>
+        <span>Audit Trail: Session logs retained in browser memory and mapped to TerraQuery query telemetry.</span>
         <span>Schema Grounding: Verified</span>
       </div>
     </div>

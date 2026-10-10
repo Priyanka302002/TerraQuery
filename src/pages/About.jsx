@@ -21,10 +21,10 @@ export default function About({ onNavigateToDashboard }) {
       <div style={{ textAlign: 'center', maxWidth: '820px', margin: '0 auto 40px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
           <span className="pill pill-cyan" style={{ fontSize: '0.74rem' }}>
-            <Award size={13} /> HACKATHON PROTOTYPE SPECIFICATION
+            <Award size={13} /> CLIMATE ANALYTICS PLATFORM
           </span>
           <span className="pill pill-emerald" style={{ fontSize: '0.74rem' }}>
-            ORACLE AI DATABASE 26ai
+            GOOGLE GEMINI + MONGODB ATLAS
           </span>
         </div>
 
@@ -40,7 +40,7 @@ export default function About({ onNavigateToDashboard }) {
         </h1>
 
         <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-          "An AI-powered natural-language interface over structured Earth and climate observations, powered by Oracle AI Database 26ai and Select AI."
+          "An AI-powered natural-language interface over structured Earth and rainfall observations, powered by Google Gemini and MongoDB Atlas."
         </p>
       </div>
 
@@ -64,10 +64,10 @@ export default function About({ onNavigateToDashboard }) {
               "No SQL. Just Ask."
             </h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              Climate science and disaster relief depend on high-velocity data queries across millions of sensor readings. Yet the people who make critical policies — climate analysts, emergency response officers, agricultural directors — rarely know SQL.
+              Climate science and disaster relief depend on high-velocity data queries across millions of observations. Yet the analysts who formulate policies — climate researchers, emergency response officers, agricultural directors — rarely write complex database queries.
             </p>
             <p style={{ fontSize: '0.9rem', color: '#E2E8F0', marginTop: '10px', lineHeight: 1.6 }}>
-              TerraQuery bridges this gap: users ask questions in plain English, and Oracle Database 26ai's native <strong>Select AI</strong> layer handles the query translation, execution, anomaly discovery, and visual mapping seamlessly.
+              TerraQuery bridges this gap: users ask questions in natural English, and the platform pairs <strong>Google Gemini</strong> with <strong>MongoDB Atlas</strong> to handle query translation, read-only validation, execution, and visual mapping seamlessly.
             </p>
           </div>
 
@@ -83,16 +83,16 @@ export default function About({ onNavigateToDashboard }) {
           }}>
             <div style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>// Natural Query Flow:</div>
             <div>User: "Compare rainfall between Durg & Raipur"</div>
-            <div style={{ color: 'var(--accent-emerald)' }}>↓ Select AI (DBMS_CLOUD_AI)</div>
-            <div>Oracle SQL: SELECT district, SUM(rainfall)...</div>
-            <div style={{ color: 'var(--accent-emerald)' }}>↓ Oracle AI Database 26ai Engine</div>
-            <div>Result: Raipur +165 mm surplus (+14.0%)</div>
-            <div style={{ color: 'var(--accent-cyan)' }}>↓ Grounded Visuals & Anomaly Map</div>
+            <div style={{ color: 'var(--accent-emerald)' }}>↓ Google Gemini AI Engine</div>
+            <div>MongoDB Query: [&#123; $match: &#123; District: &#123; $in: ["DURG", "RAIPUR"] &#125; &#125; &#125;, ...]</div>
+            <div style={{ color: 'var(--accent-emerald)' }}>↓ MongoDB Atlas Database</div>
+            <div>Result: Real IMD rainfall metrics computed</div>
+            <div style={{ color: 'var(--accent-cyan)' }}>↓ Grounded Visuals & Intensity Cartogram</div>
           </div>
         </div>
       </div>
 
-      {/* Target Users Grid (Section 2) */}
+      {/* Target Users Grid */}
       <div style={{ marginBottom: '40px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
           <Users size={18} color="var(--accent-cyan)" />
@@ -107,19 +107,19 @@ export default function About({ onNavigateToDashboard }) {
           {[
             {
               role: 'Researchers & Scientists',
-              useCase: 'Detect multi-year warming trends, calculate standard deviations, and cross-reference humidity anomalies without writing manual SQL joins.'
+              useCase: 'Detect multi-year rainfall trends, calculate deviations, and cross-reference precipitation patterns without writing manual database aggregations.'
             },
             {
               role: 'Disaster Management Teams',
-              useCase: 'Rapidly identify districts experiencing acute precipitation surplus (>25% departure) to pre-position flood relief assets.'
+              useCase: 'Rapidly identify districts experiencing acute precipitation surplus or heavy departure to pre-position flood relief assets.'
             },
             {
               role: 'Government & Environment Depts',
-              useCase: 'Formulate heat-action plans based on localized urban heat island detections, such as Durg\'s 42.8°C heatwave records.'
+              useCase: 'Formulate agricultural and monsoon contingency plans based on localized regional rainfall observations.'
             },
             {
               role: 'Policy Analysts & NGOs',
-              useCase: 'Validate agricultural monsoon stability across districts (e.g. Rajnandgaon kharif deficit) for drought compensation.'
+              useCase: 'Validate monsoon stability across districts (e.g., rainfall deficit detection) for drought relief and compensation programs.'
             }
           ].map((u, i) => (
             <div key={i} className="glass-card" style={{ padding: '20px' }}>
@@ -134,7 +134,7 @@ export default function About({ onNavigateToDashboard }) {
         </div>
       </div>
 
-      {/* 2-Minute Hackathon Jury Demonstration Script (Section 23) */}
+      {/* Interactive Demonstration Script */}
       <div className="glass-card accent-top" style={{
         padding: '28px',
         marginBottom: '40px',
@@ -144,11 +144,11 @@ export default function About({ onNavigateToDashboard }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <PlayCircle size={22} color="var(--accent-cyan)" />
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>
-              2-Minute Hackathon Jury Demo Walkthrough
+              Interactive Demonstration Walkthrough
             </h3>
           </div>
           <span className="pill pill-cyan" style={{ fontSize: '0.68rem' }}>
-            JUDGE PRESENTATION GUIDE
+            WALKTHROUGH GUIDE
           </span>
         </div>
 
@@ -160,19 +160,19 @@ export default function About({ onNavigateToDashboard }) {
           {[
             {
               step: 'Step 1: The Pitch (0:00 - 0:25)',
-              text: 'Open the Dashboard. Emphasize "Ask Earth Data Anything." State the core problem: climate data is locked behind complex SQL databases.'
+              text: 'Open the Dashboard. Emphasize "Ask Earth Data Anything." State the core problem: vital climate and rainfall data is locked behind complex database schemas.'
             },
             {
-              step: 'Step 2: Peak Query (0:25 - 0:55)',
-              text: 'Click: "Which district in Chhattisgarh had the highest temperature in 2024?". Watch the 4-step pipeline run. Show Durg (42.8°C), the auto-selected ranking chart, and the map highlight.'
+              step: 'Step 2: Peak Rainfall Query (0:25 - 0:55)',
+              text: 'Click: "Which district had the highest rainfall?". Watch the 4-step pipeline run. Inspect the real IMD records, auto-selected ranking chart, and map highlight.'
             },
             {
               step: 'Step 3: Comparison Query (0:55 - 1:25)',
-              text: 'Click: "Compare rainfall between Durg and Raipur from 2020 to 2024." Point out the dual bar chart (+165 mm surplus for Raipur).'
+              text: 'Click: "Compare rainfall between Durg and Raipur." Point out the multi-district comparison bar chart and aggregated metrics.'
             },
             {
               step: 'Step 4: Architecture & Trust (1:25 - 2:00)',
-              text: 'Open the Architecture page. Show Oracle Database 26ai + Select AI. Emphasize: "The LLM never hallucinates numbers — data is computed directly in Oracle 26ai."'
+              text: 'Open the Architecture page. Show Google Gemini + MongoDB Atlas pipeline. Emphasize: "The LLM never hallucinates numbers — data is computed directly in MongoDB Atlas."'
             }
           ].map((item, idx) => (
             <div key={idx} style={{
@@ -203,7 +203,7 @@ export default function About({ onNavigateToDashboard }) {
         </div>
       </div>
 
-      {/* Technology Differentiation Summary (Section 19) */}
+      {/* Technology Differentiation Summary */}
       <div className="glass-card" style={{ padding: '28px' }}>
         <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '16px' }}>
           Key Product Differentiators
@@ -216,15 +216,15 @@ export default function About({ onNavigateToDashboard }) {
         }}>
           {[
             {
-              title: '1. No SQL Expertise Required',
-              desc: 'Natural language queries are automatically translated to optimized Oracle SQL.'
+              title: '1. No Query Syntax Expertise Required',
+              desc: 'Natural language questions are automatically translated to optimized MongoDB aggregation pipelines.'
             },
             {
               title: '2. Deterministic Database Grounding',
-              desc: 'Answers are backed by structured observation tables in Oracle 26ai, eliminating LLM hallucinations.'
+              desc: 'Answers are backed by verified IMD observation records in MongoDB Atlas, eliminating LLM hallucinations.'
             },
             {
-              title: '3. Transparent SQL Inspector',
+              title: '3. Transparent Query Inspector',
               desc: 'Full visibility into generated queries, schema references, and execution plans with 1-click lineage auditing.'
             },
             {
@@ -233,11 +233,11 @@ export default function About({ onNavigateToDashboard }) {
             },
             {
               title: '5. Spatial Cartogram Intelligence',
-              desc: 'Interactive geographic visualization of Chhattisgarh and Indian benchmark climate nodes.'
+              desc: 'Interactive geographic visualization of Indian states and Chhattisgarh rainfall intensity nodes.'
             },
             {
               title: '6. Enterprise Security Boundaries',
-              desc: 'Operates with read-only database privileges and air-gapped credential storage.'
+              desc: 'Operates with read-only database privileges and strictly validated query operations.'
             }
           ].map((d, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>

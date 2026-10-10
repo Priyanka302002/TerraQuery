@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function LineTrendChart({ data = [], title }) {
+export default function LineTrendChart({ data = [], title, unit = 'mm' }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   if (!data || data.length === 0) return null;
@@ -146,7 +146,7 @@ export default function LineTrendChart({ data = [], title }) {
                   fontWeight={isHovered ? '700' : '600'}
                   fontFamily="var(--font-mono)"
                 >
-                  {d.value}°C
+                  {d.value}{unit ? ` ${unit}` : ''}
                 </text>
               </g>
             );
@@ -164,7 +164,7 @@ export default function LineTrendChart({ data = [], title }) {
         fontSize: '0.72rem',
         color: 'var(--text-muted)'
       }}>
-        <span>Oracle AI Database 26ai Linear Regressive Smoothing</span>
+        <span>MongoDB Atlas Linear Regressive Smoothing</span>
         <span>Confidence Interval: 95%</span>
       </div>
     </div>

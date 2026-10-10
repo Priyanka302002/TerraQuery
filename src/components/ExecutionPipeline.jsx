@@ -34,7 +34,7 @@ export default function ExecutionPipeline({ currentStep = 1, currentDetail = '' 
             textTransform: 'uppercase',
             color: 'var(--accent-cyan)'
           }}>
-            Oracle Select AI Pipeline Execution
+            TerraQuery Pipeline Execution (Google Gemini + MongoDB Atlas)
           </span>
         </div>
         <span className="pill pill-cyan" style={{ fontSize: '0.68rem' }}>

@@ -103,7 +103,7 @@ export default function ExplainQueryModal({ isOpen, onClose, queryResult }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <span className="pill pill-cyan" style={{ fontSize: '0.65rem' }}>STAGE 2</span>
               <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                Select AI Semantic Interpretation
+                Google Gemini Semantic Interpretation
               </span>
             </div>
             <div style={{
@@ -118,7 +118,7 @@ export default function ExplainQueryModal({ isOpen, onClose, queryResult }) {
               </div>
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px 12px', borderRadius: '6px' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Parameter Mapped:</span>
-                <div style={{ color: 'var(--accent-cyan)', fontWeight: 600, marginTop: '2px' }}>{queryResult.parameter || 'temperature'}</div>
+                <div style={{ color: 'var(--accent-cyan)', fontWeight: 600, marginTop: '2px' }}>{queryResult.parameter || 'rainfall'}</div>
               </div>
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px 12px', borderRadius: '6px' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Entity / Location:</span>
@@ -126,7 +126,7 @@ export default function ExplainQueryModal({ isOpen, onClose, queryResult }) {
               </div>
               <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px 12px', borderRadius: '6px' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Target Year:</span>
-                <div style={{ color: '#F8FAFC', fontWeight: 600, marginTop: '2px' }}>{queryResult.year || '2024'}</div>
+                <div style={{ color: '#F8FAFC', fontWeight: 600, marginTop: '2px' }}>{queryResult.year || 'IMD Dataset'}</div>
               </div>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function ExplainQueryModal({ isOpen, onClose, queryResult }) {
             <ArrowDown size={20} color="var(--accent-cyan)" />
           </div>
 
-          {/* Step 3: Generated Oracle SQL */}
+          {/* Step 3: Generated MongoDB Query */}
           <div style={{
             background: 'rgba(6, 12, 26, 0.7)',
             border: '1px solid var(--border-glow)',
@@ -147,11 +147,11 @@ export default function ExplainQueryModal({ isOpen, onClose, queryResult }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span className="pill pill-cyan" style={{ fontSize: '0.65rem' }}>STAGE 3</span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Generated Oracle AI Database 26ai SQL
+                  Generated MongoDB Atlas Query
                 </span>
               </div>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                Oracle 26ai Engine
+                MongoDB Atlas Engine
               </span>
             </div>
             <pre className="code-block" style={{ fontSize: '0.8rem', margin: 0 }}>
@@ -194,8 +194,8 @@ export default function ExplainQueryModal({ isOpen, onClose, queryResult }) {
             }}>
               <div>PRIMARY VALUE : {queryResult.kpi?.value} ({queryResult.kpi?.district})</div>
               <div>METRIC LABEL   : {queryResult.kpi?.label}</div>
-              <div>ROWS EXAMINED  : {queryResult.rowsExamined?.toLocaleString()} records in CLIMATE_DATA</div>
-              <div>STATUS         : Oracle SQL execution successful (HTTP 200 OK)</div>
+              <div>ROWS EXAMINED  : {queryResult.rowsExamined?.toLocaleString()} records in terraquery.rainfall</div>
+              <div>STATUS         : MongoDB query execution successful (HTTP 200 OK)</div>
             </div>
           </div>
 
@@ -234,7 +234,7 @@ export default function ExplainQueryModal({ isOpen, onClose, queryResult }) {
           }}>
             <ShieldCheck size={22} color="#00F2FE" style={{ flexShrink: 0 }} />
             <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-              <strong style={{ color: 'var(--text-primary)' }}>Zero-Hallucination Architectural Guarantee:</strong> The LLM does NOT generate climate measurements. All numerical values are retrieved directly from structured tables in Oracle AI Database 26ai; the LLM merely translates English to SQL and synthesizes the returned tabular rows.
+              <strong style={{ color: 'var(--text-primary)' }}>Zero-Hallucination Architectural Guarantee:</strong> The LLM does NOT generate climate measurements. All numerical values are retrieved directly from structured records in MongoDB Atlas; Google Gemini translates natural language into validated queries and synthesizes the returned records.
             </div>
           </div>
 
